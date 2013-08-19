@@ -25,13 +25,16 @@
         <property name="viewClass" value="org.springframework.web.servlet.view.velocity.VelocityView"></property>
         <property name="suffix" value=".vm"></property>
         <property name="order" value="1"></property>
+
+        <property name="dateToolAttribute" value="date"></property>
+        <property name="toolboxConfigLocation" value="/WEB-INF/toolbox.xml"/>
+
         <!--<property name="exposeSpringMacroHelpers" value="true"/>-->
         <!--<property name="exposeRequestAttributes" value="true"/>-->
         <!--<property name="exposeSessionAttributes" value="true"/>-->
         <!--<property name="allowSessionOverride" value="true"/>-->
         <!--<property name="contentType" value="text/html;charset=UTF-8"/>-->
         <!--<property name="dateToolAttribute" value="dateTool"/>-->
-        <!--<property name="toolboxConfigLocation" value="/WEB-INF/toolbox.xml"/>-->
     </bean>
 
 
