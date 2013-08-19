@@ -11,15 +11,16 @@ import java.util.Calendar;
  * Created with IntelliJ IDEA.
  * User: huaiwang
  * Date: 8/19/13
- * Time: 9:45 AM
+ * Time: 10:24 AM
  * To change this template use File | Settings | File Templates.
  */
+
 @Controller
-@RequestMapping("/hello")
-public class HelloAction {
+@RequestMapping("/hello2")
+public class HelloVelocityAction {
     @RequestMapping(method = RequestMethod.GET)
     public String index(ModelMap map) {
         map.put("time", Calendar.getInstance().getTimeInMillis());
-        return "/hello";
+        return "hello2";
     }
 }
