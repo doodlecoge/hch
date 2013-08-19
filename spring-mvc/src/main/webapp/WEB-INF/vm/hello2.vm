@@ -1,4 +1,5 @@
-
+build #: ${bn}
+<hr/>
 $date
 <hr/>
 hell spring mvc @$time, velocity
