@@ -1,0 +1,11 @@
+<!doctype html>
+<html>
+<head>
+    <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+    <title>${title} - Huaichao, Ver.$ver</title>
+    ${head}
+</head>
+<body>
+    ${body}
+</body>
+</html>

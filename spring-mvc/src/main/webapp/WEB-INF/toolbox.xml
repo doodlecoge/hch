@@ -1,5 +1,5 @@
 <tools>
-    <data key="bn" type="string" value="xxx"></data>
+    <data key="ver" type="string" value="${buildNumber}"></data>
     <!--<toolbox scope="request" xhtml="true">-->
     <!--<tool key="toytool" class="ToyTool" restrictTo="index.vm"/>-->
     <!--<tool key="custom" class="org.mine.CustomTool" randomProperty="whatever"/>-->
@@ -11,7 +11,7 @@
     <!--</toolbox>-->
 
     <toolbox scope="application">
-        <tool class="org.apache.velocity.tools.generic.DateTool"/>
+        <tool key="date" class="org.apache.velocity.tools.generic.DateTool"/>
     </toolbox>
 
     <!--<data type="number" key="version" value="1.1"/>-->
