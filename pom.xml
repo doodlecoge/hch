@@ -9,6 +9,7 @@
     <version>1.0.0</version>
     <modules>
         <module>spring-mvc</module>
+        <module>handy-tools</module>
     </modules>
     <packaging>pom</packaging>
 

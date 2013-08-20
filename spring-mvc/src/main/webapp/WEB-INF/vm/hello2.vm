@@ -1,8 +1,8 @@
 <body>
 
-Build #: ${ver}
+Build #: ${ver}, ${bn}
 <hr/>
-Current Time: $date
+Current Time: $date, $date2
 <hr/>
 hell spring mvc @$time, velocity
 

@@ -30,16 +30,14 @@
 
     <bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
         <property name="resourceLoaderPath" value="/WEB-INF/vm"/>
-        <!--<property name="configLocation" value="/WEB-INF/velocity.properties"/>-->
-        <!--<property name="velocityProperties">-->
-            <!--<props>-->
-                <!--<prop key="input.encoding">utf-8</prop>-->
-                <!--<prop key="output.encoding">utf-8</prop>-->
-                <!--<prop key="bn">aaabn</prop>-->
-                <!--<prop key="tools.data.bn">dddddddddbn</prop>-->
-                <!--<prop key="data.bn">xxxxx</prop>-->
-            <!--</props>-->
-        <!--</property>-->
+        <property name="configLocation" value="/WEB-INF/velocity.properties"/>
+
+        <property name="velocityProperties">
+            <props>
+                <prop key="input.encoding">utf-8</prop>
+                <prop key="output.encoding">utf-8</prop>
+            </props>
+        </property>
     </bean>
 
     <bean id="velocity" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
@@ -47,16 +45,12 @@
         <property name="suffix" value=".vm"></property>
         <property name="order" value="1"></property>
 
-        <!--<property name="dateToolAttribute" value="date"></property>-->
-        <property name="toolboxConfigLocation" value="/WEB-INF/toolbox.xml"/>
         <property name="contentType" value="text/html;charset=utf-8"></property>
-
-
-
         <property name="exposeSpringMacroHelpers" value="true"/>
         <property name="exposeRequestAttributes" value="true"/>
         <property name="exposeSessionAttributes" value="true"/>
         <property name="allowSessionOverride" value="true"/>
+        <property name="toolboxConfigLocation" value="/WEB-INF/tools.xml"/>
     </bean>
 
 
