@@ -1,0 +1,9 @@
+<body>
+
+Build #: ${ver}, ${bn}
+<hr/>
+Current Time: $date, $date2
+<hr/>
+hell spring mvc @$time, velocity
+
+</body>

@@ -1,0 +1,9 @@
+<decorators defaultdir="/WEB-INF/decorators">
+    <decorator name="null">
+
+    </decorator>
+
+    <decorator name="main" page="main.vm">
+        <pattern>/*</pattern>
+    </decorator>
+</decorators>
