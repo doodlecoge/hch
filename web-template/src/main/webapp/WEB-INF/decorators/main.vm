@@ -3,14 +3,19 @@
 <head>
     <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
     <title>${title} - Huaichao, Ver.$ver</title>
-    <link type="text/css" rel="stylesheet" href="${base}/css/font-awesome.css" />
-    <link type="text/css" rel="stylesheet" href="${base}/css/bootstrap.css" />
+    <link type="text/css" rel="stylesheet" href="${base}/css/jquery-ui-1.10.3.custom.css"/>
+    <link type="text/css" rel="stylesheet" href="${base}/css/font-awesome.css"/>
+    <link type="text/css" rel="stylesheet" href="${base}/css/bootstrap.css"/>
+
+    <script type="text/javascript" src="${base}/js/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="${base}/js/jquery-ui-1.10.3.custom.js"></script>
+    <script type="text/javascript" src="${base}/js/bootstrap.js"></script>
 
     ${head}
 </head>
 <body>
-    <h1><i class="icon-heart"></i>Header</h1>
+    #parse("/WEB-INF/decorators/header.vm")
     ${body}
-    <h1>Footer</h1>
+    #parse("/WEB-INF/decorators/footer.vm")
 </body>
 </html>

@@ -12,5 +12,7 @@
 </head>
 <body>
     hello spring mvc @${time}
+
+    <a href="javascript:;" class="btn">Hello Button</a>
 </body>
 </html>
