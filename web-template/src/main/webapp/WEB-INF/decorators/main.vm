@@ -6,9 +6,10 @@
     <link type="text/css" rel="stylesheet" href="${base}/css/jquery-ui-1.10.3.custom.css"/>
     <link type="text/css" rel="stylesheet" href="${base}/css/font-awesome.css"/>
     <link type="text/css" rel="stylesheet" href="${base}/css/bootstrap.css"/>
+    <link type="text/css" rel="stylesheet" href="${base}/css/bootstrap-responsive.css"/>
 
     <script type="text/javascript" src="${base}/js/jquery-1.10.2.js"></script>
-    <script type="text/javascript" src="${base}/js/jquery-ui-1.10.3.custom.js"></script>
+##    <script type="text/javascript" src="${base}/js/jquery-ui-1.10.3.custom.js"></script>
     <script type="text/javascript" src="${base}/js/bootstrap.js"></script>
 
     ${head}
