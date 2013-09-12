@@ -10,6 +10,8 @@ package com.hch.utils.net;
 
 import com.hch.utils.HchException;
 import org.apache.http.*;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -30,12 +32,19 @@ import org.apache.http.impl.cookie.BrowserCompatSpec;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.DefaultedHttpContext;
+import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 
 import javax.net.ssl.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -54,6 +63,7 @@ public class HttpEngine {
 
     private DefaultHttpClient client;
     private HttpResponse resp;
+    private URL previousUrl;
 
 
     // ***************************************************************
@@ -149,6 +159,13 @@ public class HttpEngine {
 
 
     // ***************************************************************
+    // set credentials
+    public void setCredentials(AuthScope authScope, UsernamePasswordCredentials credentials) {
+        client.getCredentialsProvider().setCredentials(authScope, credentials);
+    }
+
+
+    // ***************************************************************
     {
         this.client = new DefaultHttpClient();
 
@@ -156,19 +173,20 @@ public class HttpEngine {
         this.client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, ReadTimeout);
     }
 
-    public HttpEngine get(String url) throws IOException {
+
+    public HttpEngine get(String url) throws IOException, URISyntaxException {
         return this.get(url, null);
     }
 
-    public HttpEngine get(String url, List<NameValuePair> params) throws IOException {
+    public HttpEngine get(String url, List<NameValuePair> params) throws IOException, URISyntaxException {
         return this.get(url, params, new Header[]{});
     }
 
-    public HttpEngine get(String url, List<NameValuePair> params, Header header) throws IOException {
+    public HttpEngine get(String url, List<NameValuePair> params, Header header) throws IOException, URISyntaxException {
         return this.get(url, params, new Header[]{header});
     }
 
-    public HttpEngine get(String url, List<NameValuePair> params, Header[] headers) throws IOException {
+    public HttpEngine get(String url, List<NameValuePair> params, Header[] headers) throws IOException, URISyntaxException {
         String getUrl = url;
 
         if (params != null && params.size() > 0)
@@ -183,19 +201,8 @@ public class HttpEngine {
         return this.exec(get);
     }
 
-    public HttpEngine post(String url, List<NameValuePair> postData)
-            throws IOException {
-        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(postData,
-                "UTF-8");
-
-        HttpPost post = new HttpPost(url);
-        post.setEntity(entity);
-
-        return this.exec(post);
-    }
-
     public HttpEngine post(String url, Map<String, String> postData)
-            throws IOException {
+            throws IOException, URISyntaxException {
         List<NameValuePair> params = new ArrayList<NameValuePair>();
 
         Iterator<String> it = postData.keySet().iterator();
@@ -208,10 +215,38 @@ public class HttpEngine {
         return this.post(url, params);
     }
 
-    private HttpEngine exec(HttpUriRequest req) throws IOException {
+    public HttpEngine post(String url, List<NameValuePair> postData) throws IOException, URISyntaxException {
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(postData, "UTF-8");
+
+        HttpPost post = new HttpPost(url);
+        post.setEntity(entity);
+
+        return this.exec(post);
+    }
+
+    private HttpEngine exec(HttpUriRequest req) throws IOException, URISyntaxException {
+        if (req.getURI().getScheme() == null && previousUrl != null) {
+            reConstructUrl(req, previousUrl);
+        } else previousUrl = req.getURI().toURL();
+
+
         if (this.resp != null) this.consume();
         this.resp = this.client.execute(req);
         return this;
+    }
+
+    private void reConstructUrl(HttpUriRequest req, URL previousUrl) throws MalformedURLException, URISyntaxException {
+        URL url = new URL(previousUrl, req.getURI().toString());
+
+        this.previousUrl = url;
+
+        if (req instanceof HttpGet) {
+            ((HttpGet) req).setURI(new URI(url.toString()));
+        } else if (req instanceof HttpPost) {
+            ((HttpPost) req).setURI(new URI(url.toString()));
+        } else {
+            throw new HchException("reconstruct url failed!");
+        }
     }
 
     public void consume() {
