@@ -263,6 +263,17 @@ public class HttpEngine {
         return this.exec(get);
     }
 
+
+    public HttpEngine submitForm(WebForm webForm) throws IOException, URISyntaxException {
+        if (webForm.getMethod() == WebForm.METHOD_GET)
+            get(webForm.getUrl(), webForm.getPostDataPairs());
+
+        else if (webForm.getMethod() == WebForm.METHOD_POST)
+            post(webForm.getUrl(), webForm.getPostDataPairs());
+
+        return this;
+    }
+
     public HttpEngine post(String url, Map<String, String> postData)
             throws IOException, URISyntaxException {
         List<NameValuePair> params = new ArrayList<NameValuePair>();
