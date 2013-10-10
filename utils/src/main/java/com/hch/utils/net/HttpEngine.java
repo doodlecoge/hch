@@ -14,6 +14,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.RedirectStrategy;
+import org.apache.http.client.entity.GzipDecompressingEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -36,11 +37,15 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.DefaultedHttpContext;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -58,12 +63,15 @@ import java.util.Map;
 
 
 public class HttpEngine {
+    private static final Logger log = LoggerFactory.getLogger(HttpEngine.class);
+
     private static final int ConnectionTimeout = 30000;
     private static final int ReadTimeout = 30000;
 
     private DefaultHttpClient client;
     private HttpResponse resp;
     private URL previousUrl;
+    private boolean redirectPost = false;
 
 
     // ***************************************************************
@@ -109,7 +117,7 @@ public class HttpEngine {
     // ***************************************************************
     // ssl check/verify
 
-    private static X509TrustManager DoNotCheckTrusted = new X509TrustManager() {
+    public static final X509TrustManager DoNotCheckTrusted = new X509TrustManager() {
         public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         }
 
@@ -121,7 +129,7 @@ public class HttpEngine {
         }
     };
 
-    private static X509HostnameVerifier AlwaysVerifiedSuccess = new X509HostnameVerifier() {
+    public static final X509HostnameVerifier AlwaysVerifiedSuccess = new X509HostnameVerifier() {
         public boolean verify(String arg0, SSLSession arg1) {
             return true;
         }
@@ -166,11 +174,65 @@ public class HttpEngine {
 
 
     // ***************************************************************
+    // request interceptor
+    public void addRequestInterceptor(HttpRequestInterceptor reqInterceptor) {
+        client.addRequestInterceptor(reqInterceptor);
+    }
+
+    public void addRequestInterceptor(HttpRequestInterceptor reqInterceptor, int index) {
+        client.addRequestInterceptor(reqInterceptor, index);
+    }
+
+
+    // ***************************************************************
+    // response interceptor
+    public static final HttpResponseInterceptor DecompressResponseInterceptor = new HttpResponseInterceptor() {
+        @Override
+        public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
+            HttpEntity entity = response.getEntity();
+            if (entity == null) return;
+
+            Header ceheader = entity.getContentEncoding();
+            if (ceheader == null) return;
+
+            HeaderElement[] codecs = ceheader.getElements();
+
+            for (HeaderElement codec : codecs) {
+                String enc = codec.getName();
+
+                if (enc.equalsIgnoreCase("gzip")) {
+                    response.setEntity(
+                            new GzipDecompressingEntity(entity)
+                    );
+                    return;
+                }
+
+                // todo: add other content encoding handler here
+                // else if (enc.equalsIgnoreCase("gzip")) {}
+            }
+
+            log.warn("not handled encoding: [" + ceheader.getName() + ": " + ceheader.getValue() + "]");
+        }
+    };
+
+    public void addResponseInterceptor(HttpResponseInterceptor respInterceptor) {
+        client.addResponseInterceptor(respInterceptor);
+    }
+
+    public void addResponseInterceptor(HttpResponseInterceptor respInterceptor, int index) {
+        client.addResponseInterceptor(respInterceptor, index);
+    }
+
+
+    // ***************************************************************
     {
         this.client = new DefaultHttpClient();
 
         this.client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, ConnectionTimeout);
         this.client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, ReadTimeout);
+
+
+//        this.client.addResponseInterceptor(defaultResponseInterceptor);
     }
 
 
@@ -232,7 +294,15 @@ public class HttpEngine {
 
         if (this.resp != null) this.consume();
         this.resp = this.client.execute(req);
-        return this;
+
+        // redirect post
+        if (redirectPost && getStatusCode() == HttpStatus.SC_MOVED_TEMPORARILY) {
+            Header loc = resp.getLastHeader(HttpHeaders.LOCATION);
+            String redirectLocation = loc.getValue();
+            return get(redirectLocation);
+        } else {
+            return this;
+        }
     }
 
     private void reConstructUrl(HttpUriRequest req, URL previousUrl) throws MalformedURLException, URISyntaxException {
@@ -285,21 +355,52 @@ public class HttpEngine {
     }
 
     public String getHtml() throws IllegalStateException, IOException {
-        InputStream is = this.resp.getEntity().getContent();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int b = -1;
+        return EntityUtils.toString(resp.getEntity());
+//
+//        InputStream is = getInputStream();
+//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//        int b = -1;
+//
+//        while ((b = is.read()) != -1)
+//            baos.write(b);
+//
+//        is.close();
+//
+//        String enc = null;
+//
+//        if (enc != null)
+//            return new String(baos.toByteArray(), enc);
+//        else
+//            return baos.toString();
+    }
 
-        while ((b = is.read()) != -1)
-            baos.write(b);
 
-        is.close();
+    public void printHeaders(OutputStream os) throws IOException {
+        Header[] allHeaders = this.resp.getAllHeaders();
 
-        String enc = null;
+        if (os == null) os = System.out;
 
-        if (enc != null)
-            return new String(baos.toByteArray(), enc);
-        else
-            return baos.toString();
+        for (Header header : allHeaders) {
+            HeaderElement[] headerElements = header.getElements();
+
+            /*
+            for (HeaderElement headerElement : headerElements) {
+                String name = headerElement.getName();
+                String value = headerElement.getValue();
+
+                String headerStr = name + ": " + value;
+                os.write(headerStr.getBytes());
+                os.write("\n".getBytes());
+            }
+            */
+
+            String name = header.getName();
+            String value = header.getValue();
+
+            String headerStr = name + ": " + value;
+            os.write(headerStr.getBytes());
+            os.write("\n".getBytes());
+        }
     }
 
     public CookieStore getCookieStore() {
@@ -308,6 +409,15 @@ public class HttpEngine {
 
     public void setCookie(CookieStore cs) {
         ((DefaultHttpClient) this.client).setCookieStore(cs);
+    }
+
+
+    public boolean isRedirectPost() {
+        return redirectPost;
+    }
+
+    public void setRedirectPost(boolean redirectPost) {
+        this.redirectPost = redirectPost;
     }
 }
 
