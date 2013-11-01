@@ -65,8 +65,8 @@ import java.util.Map;
 public class HttpEngine {
     private static final Logger log = LoggerFactory.getLogger(HttpEngine.class);
 
-    private static final int ConnectionTimeout = 30000;
-    private static final int ReadTimeout = 30000;
+    private static int ConnectionTimeout = 30000;
+    private static int ReadTimeout = 30000;
 
     private DefaultHttpClient client;
     private HttpResponse resp;
@@ -233,6 +233,25 @@ public class HttpEngine {
 
 
 //        this.client.addResponseInterceptor(defaultResponseInterceptor);
+    }
+
+
+
+
+    public static void setConnectionTimeout(int mills) {
+        if (mills < 1000) {
+            ConnectionTimeout = 1000;
+        } else {
+            ConnectionTimeout = mills;
+        }
+    }
+
+    public static void setReadTimeout(int mills) {
+        if (mills < 1000) {
+            ReadTimeout = 1000;
+        } else {
+            ReadTimeout = mills;
+        }
     }
 
 
