@@ -481,52 +481,12 @@ public class HttpEngine {
 
     public String getHtml() throws IllegalStateException, IOException {
         return EntityUtils.toString(resp.getEntity());
-//
-//        InputStream is = getInputStream();
-//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//        int b = -1;
-//
-//        while ((b = is.read()) != -1)
-//            baos.write(b);
-//
-//        is.close();
-//
-//        String enc = null;
-//
-//        if (enc != null)
-//            return new String(baos.toByteArray(), enc);
-//        else
-//            return baos.toString();
     }
 
-
-    public void printHeaders(OutputStream os) throws IOException {
-        Header[] allHeaders = this.resp.getAllHeaders();
-
-        if (os == null) os = System.out;
-
-        for (Header header : allHeaders) {
-            HeaderElement[] headerElements = header.getElements();
-
-            /*
-            for (HeaderElement headerElement : headerElements) {
-                String name = headerElement.getName();
-                String value = headerElement.getValue();
-
-                String headerStr = name + ": " + value;
-                os.write(headerStr.getBytes());
-                os.write("\n".getBytes());
-            }
-            */
-
-            String name = header.getName();
-            String value = header.getValue();
-
-            String headerStr = name + ": " + value;
-            os.write(headerStr.getBytes());
-            os.write("\n".getBytes());
-        }
+    public String getHtml(String charSet) throws IllegalStateException, IOException {
+        return EntityUtils.toString(resp.getEntity(), charSet);
     }
+
 
     public CookieStore getCookieStore() {
         return ((DefaultHttpClient) this.client).getCookieStore();
