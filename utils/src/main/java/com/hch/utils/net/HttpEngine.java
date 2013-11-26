@@ -230,8 +230,6 @@ public class HttpEngine {
     }
 
 
-
-
     public static void setConnectionTimeout(int mills) {
         if (mills < 1000) {
             ConnectionTimeout = 1000;
@@ -306,6 +304,34 @@ public class HttpEngine {
         post.setEntity(entity);
 
         return this.exec(post);
+    }
+
+    public HttpEngine post(String url, List<NameValuePair> postData, Header header) throws IOException, URISyntaxException {
+        return post(url, postData, new Header[]{header});
+    }
+
+    public HttpEngine post(String url, List<NameValuePair> postData, Header[] headers) throws IOException, URISyntaxException {
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(postData, "UTF-8");
+
+        HttpPost post = new HttpPost(url);
+        post.setEntity(entity);
+
+        if (headers != null && headers.length > 0) {
+            post.setHeaders(headers);
+        }
+
+        return this.exec(post);
+    }
+
+    public HttpEngine post(String url, List<NameValuePair> postData, List<Header> headers) throws IOException, URISyntaxException {
+
+        Header[] h = null;
+
+        if (headers != null && headers.size() > 0) {
+            h = headers.toArray(new Header[headers.size()]);
+        }
+
+        return post(url, postData, h);
     }
 
     private HttpEngine exec(HttpUriRequest req) throws IOException, URISyntaxException {
