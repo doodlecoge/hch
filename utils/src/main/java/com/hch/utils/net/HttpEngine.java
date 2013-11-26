@@ -402,7 +402,7 @@ public class HttpEngine {
         }
     }
 
-    private String printHeaders() {
+    public String printHeaders() {
         Header[] allHeaders = getAllHeaders();
         if (allHeaders == null) {
             return "";
@@ -415,7 +415,7 @@ public class HttpEngine {
         return sb.toString();
     }
 
-    private String printHeaders(String headerName) {
+    public String printHeaders(String headerName) {
         Header[] headers = getHeaders(headerName);
 
         if (headers == null) {
