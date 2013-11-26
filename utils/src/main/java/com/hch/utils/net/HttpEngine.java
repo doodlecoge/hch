@@ -27,6 +27,7 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.cookie.*;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BrowserCompatSpec;
 import org.apache.http.message.BasicNameValuePair;
@@ -41,6 +42,7 @@ import javax.net.ssl.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -295,6 +297,14 @@ public class HttpEngine {
         }
 
         return this.post(url, params);
+    }
+
+
+    public HttpEngine post(String url, String postData) throws IOException, URISyntaxException {
+        StringEntity entity = new StringEntity(postData);
+        HttpPost post = new HttpPost(url);
+        post.setEntity(entity);
+        return this.exec(post);
     }
 
     public HttpEngine post(String url, List<NameValuePair> postData) throws IOException, URISyntaxException {
