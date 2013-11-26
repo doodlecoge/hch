@@ -16,6 +16,7 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.entity.GzipDecompressingEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -251,6 +252,9 @@ public class HttpEngine {
     }
 
 
+    //****************************************************
+    // get methods
+    //****************************************************
     public HttpEngine get(String url) throws IOException, URISyntaxException {
         return this.get(url, null);
     }
@@ -289,6 +293,9 @@ public class HttpEngine {
         return this;
     }
 
+    //****************************************************
+    // post methods
+    //****************************************************
     public HttpEngine post(String url, Map<String, String> postData)
             throws IOException, URISyntaxException {
         List<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -355,6 +362,27 @@ public class HttpEngine {
         return exec(post);
     }
 
+    //****************************************************
+    // delete methods
+    //****************************************************
+    public HttpEngine delete(String url) throws IOException, URISyntaxException {
+        return delete(url, NullHeaders);
+    }
+
+    public HttpEngine delete(String url, List<Header> headers) throws IOException, URISyntaxException {
+        Header[] hs = null;
+        if (headers != null && headers.size() > 0) {
+            hs = headers.toArray(new Header[headers.size()]);
+        }
+        return delete(url, hs);
+    }
+
+    public HttpEngine delete(String url, Header[] headers) throws IOException, URISyntaxException {
+        HttpDelete delete = new HttpDelete(url);
+        delete.setHeaders(headers);
+        return exec(delete);
+    }
+
     private HttpEngine exec(HttpUriRequest req) throws IOException, URISyntaxException {
         if (req.getURI().getScheme() == null && previousUrl != null) {
             reConstructUrl(req, previousUrl);
@@ -373,6 +401,8 @@ public class HttpEngine {
             return this;
         }
     }
+
+
 
     private void reConstructUrl(HttpUriRequest req, URL previousUrl) throws MalformedURLException, URISyntaxException {
         URL url = new URL(previousUrl, req.getURI().toString());
