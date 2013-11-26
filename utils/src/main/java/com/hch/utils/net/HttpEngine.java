@@ -42,7 +42,6 @@ import javax.net.ssl.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -68,6 +67,9 @@ public class HttpEngine {
     private HttpResponse resp;
     private URL previousUrl;
     private boolean redirectPost = false;
+
+    // used to solve method call ambiguity
+    private static final Header[] NullHeaders = null;
 
 
     // ***************************************************************
@@ -302,35 +304,20 @@ public class HttpEngine {
 
     public HttpEngine post(String url, String postData) throws IOException, URISyntaxException {
         StringEntity entity = new StringEntity(postData);
-        HttpPost post = new HttpPost(url);
-        post.setEntity(entity);
-        return this.exec(post);
+        return post(url, entity, NullHeaders);
+    }
+
+    public HttpEngine post(String url, String postData, List<Header> headers) throws IOException, URISyntaxException {
+        StringEntity entity = new StringEntity(postData);
+        return post(url, entity, headers);
     }
 
     public HttpEngine post(String url, List<NameValuePair> postData) throws IOException, URISyntaxException {
-        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(postData, "UTF-8");
-
-        HttpPost post = new HttpPost(url);
-        post.setEntity(entity);
-
-        return this.exec(post);
+        return post(url, postData, NullHeaders);
     }
 
     public HttpEngine post(String url, List<NameValuePair> postData, Header header) throws IOException, URISyntaxException {
         return post(url, postData, new Header[]{header});
-    }
-
-    public HttpEngine post(String url, List<NameValuePair> postData, Header[] headers) throws IOException, URISyntaxException {
-        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(postData, "UTF-8");
-
-        HttpPost post = new HttpPost(url);
-        post.setEntity(entity);
-
-        if (headers != null && headers.length > 0) {
-            post.setHeaders(headers);
-        }
-
-        return this.exec(post);
     }
 
     public HttpEngine post(String url, List<NameValuePair> postData, List<Header> headers) throws IOException, URISyntaxException {
@@ -342,6 +329,30 @@ public class HttpEngine {
         }
 
         return post(url, postData, h);
+    }
+
+    public HttpEngine post(String url, List<NameValuePair> postData, Header[] headers) throws IOException, URISyntaxException {
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(postData, "UTF-8");
+        return post(url, entity, headers);
+    }
+
+
+    public HttpEngine post(String url, HttpEntity entity, List<Header> headers) throws IOException, URISyntaxException {
+        Header[] hs = null;
+        if (headers != null && headers.size() > 0) {
+            hs = headers.toArray(new Header[headers.size()]);
+        }
+
+        return post(url, entity, hs);
+    }
+
+    public HttpEngine post(String url, HttpEntity entity, Header[] headers) throws IOException, URISyntaxException {
+        HttpPost post = new HttpPost(url);
+        if (headers != null && headers.length > 0) {
+            post.setHeaders(headers);
+        }
+        post.setEntity(entity);
+        return exec(post);
     }
 
     private HttpEngine exec(HttpUriRequest req) throws IOException, URISyntaxException {
