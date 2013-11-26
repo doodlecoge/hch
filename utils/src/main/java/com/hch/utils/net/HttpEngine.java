@@ -402,7 +402,33 @@ public class HttpEngine {
         }
     }
 
+    private String printHeaders() {
+        Header[] allHeaders = getAllHeaders();
+        if (allHeaders == null) {
+            return "";
+        }
 
+        StringBuilder sb = new StringBuilder();
+        for (Header allHeader : allHeaders) {
+            sb.append(allHeader.getName()).append(":").append(allHeader.getValue()).append("\n");
+        }
+        return sb.toString();
+    }
+
+    private String printHeaders(String headerName) {
+        Header[] headers = getHeaders(headerName);
+
+        if (headers == null) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(headerName).append(":");
+        for (Header header : headers) {
+            sb.append(header.getName()).append("=").append(header.getValue()).append(";");
+        }
+        return sb.toString();
+    }
 
     private void reConstructUrl(HttpUriRequest req, URL previousUrl) throws MalformedURLException, URISyntaxException {
         URL url = new URL(previousUrl, req.getURI().toString());
