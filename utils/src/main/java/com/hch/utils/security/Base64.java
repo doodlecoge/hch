@@ -1,5 +1,9 @@
 package com.hch.utils.security;
 
+import com.hch.utils.HchException;
+
+import java.io.UnsupportedEncodingException;
+
 /**
  * User: huaiwang
  * Date: 13-9-12
@@ -40,4 +44,28 @@ public class Base64 {
 
         return ret;
     }
+
+
+    public static String encode(String raw) {
+        byte[] enBytes = org.apache.commons.codec.binary.Base64.encodeBase64(raw.getBytes());
+        return new String(enBytes);
+    }
+
+    public static String decode(String encodedString) {
+        return decode(encodedString, null);
+    }
+
+    public static String decode(String encodedString, String charset) {
+        byte[] rawBytes = org.apache.commons.codec.binary.Base64.decodeBase64(encodedString.getBytes());
+        try {
+            if (charset == null)
+                return new String(rawBytes);
+            else
+                return new String(rawBytes, charset);
+        } catch (UnsupportedEncodingException e) {
+            throw new HchException(e);
+        }
+    }
+
+
 }
