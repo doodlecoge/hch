@@ -1,7 +1,10 @@
 package com.hch.utils.security;
 
 import com.hch.utils.HchException;
+import org.apache.commons.io.IOUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 /**
@@ -50,6 +53,20 @@ public class Base64 {
         byte[] enBytes = org.apache.commons.codec.binary.Base64.encodeBase64(raw.getBytes());
         return new String(enBytes);
     }
+
+    public static String encode(InputStream is) {
+        byte[] bytes = new byte[0];
+        try {
+            bytes = IOUtils.toByteArray(is);
+        } catch (IOException e) {
+            throw new HchException(e);
+        }
+        byte[] enBytes = org.apache.commons.codec.binary.Base64.encodeBase64(bytes);
+        return new String(enBytes);
+    }
+
+
+
 
     public static String decode(String encodedString) {
         return decode(encodedString, null);
